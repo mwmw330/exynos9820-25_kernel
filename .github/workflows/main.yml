@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        model: [ "N759F" ]  # 👈 CHANGE THIS TO YOUR DEVICE MODEL
+        model: [ "G973F" ]  # 👈 CHANGE TO YOUR MODEL
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,8 +22,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y bc bison build-essential ccache clang flex \
-          g++ gcc gcc-aarch64-linux-gnu git gnupg kmod libelf-dev libncurses-dev \
-          libssl-dev lld python3 unzip wget zip zstd
+          g++ gcc gcc-aarch64-linux-gnu git gnupg libelf-dev libncurses-dev \
+          libssl-dev lld python3 unzip zstd
 
       - name: Kernel Configure
         run: |
@@ -44,7 +45,7 @@ jobs:
         run: ./cruelbuild mkimg
 
       - name: Upload boot.img
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4    # ✅ FIXED: v3 → v4
         with:
           name: boot-${{ matrix.model }}
           path: boot.img
