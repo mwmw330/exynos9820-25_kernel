@@ -42,7 +42,7 @@ jobs:
           curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 
       - name: Build Kernel
-        run: ./cruelbuild mkimg
+        run: ./cruelbuild mkimg model=${{ matrix.model }}
 
       - name: Upload boot.img
         uses: actions/upload-artifact@v4    # ✅ FIXED: v3 → v4
