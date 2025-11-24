@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        model: [ "G973F" ]  # 👈 CHANGE TO YOUR MODEL
+        model: [ "N759F" ]  # 👈 CHANGE TO YOUR MODEL
 
     steps:
       - name: Checkout code
