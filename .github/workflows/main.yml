@@ -45,7 +45,7 @@ jobs:
                        os_patch_level=2099-12
 
       # Step 2: Confirm Magisk is OFF by inspecting generated config
-      - name: Debug: Show active config
+      - name: Debug Show active config
         run: |
           echo "=== Generated config for ${{ matrix.model }} ==="
           cat ".config_cruel" || echo ".config_cruel not found"
