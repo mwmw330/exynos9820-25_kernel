@@ -52,10 +52,9 @@ jobs:
           echo "=== End config ==="
 
       # Step 3: Apply KernelSU
-      - name: Apply KernelSU (legacy 4.14/4.19)
+      - name: Apply KernelSU
         run: |
-          git clone -b kernel-4.14-legacy https://github.com/tiann/KernelSU kernelsu
-          cp -r kernelsu/kernel/* .
+          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 
       # Step 4: Build
       - name: Build Kernel
