@@ -1,19 +1,50 @@
-name: Build
+name: Build CruelKernel with KernelSU
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        model: [ "G973F" ]  # 👈 CHANGE THIS TO YOUR DEVICE MODEL
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
 
-      - name: env setup
-        run: sudo apt-get update --fix-missing && sudo apt-get install bc bison build-essential zstd clang flex gnupg gperf ccache liblz4-tool libncurses5-dev libsdl1.2-dev libstdc++6 libxml2 libxml2-utils lzop pngcrush schedtool squashfs-tools xsltproc zlib1g-dev libncurses5-dev bzip2 git gcc g++ libssl-dev openssl python3 -y && sudo apt-get install gcc-aarch64-linux-gnu && sudo apt-get install gcc-arm-linux-gnueabihf&& sudo apt-get install lld&& sudo apt-get install gcc-arm-linux-gnueabi
-        
-      - name: build
-        env:
-          token: ${{ secrets.TOKEN }}
-        run: chmod +x build.sh && ./build.sh "${token}"
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y bc bison build-essential ccache clang flex \
+          g++ gcc gcc-aarch64-linux-gnu git gnupg kmod libelf-dev libncurses-dev \
+          libssl-dev lld python3 unzip wget zip zstd
 
+      - name: Kernel Configure
+        run: |
+          ./cruelbuild config                    \
+                       model=${{ matrix.model }} \
+                       name="Cruel-KSU"          \
+                       +nohardening              \
+                       +wireguard                \
+                       +ttl                      \
+                       +sdfat                    \
+                       +1000hz                   \
+                       os_patch_level=2099-12
+
+      - name: Apply KernelSU patch
+        run: |
+          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+
+      - name: Build Kernel
+        run: ./cruelbuild mkimg
+
+      - name: Upload boot.img
+        uses: actions/upload-artifact@v3
+        with:
+          name: boot-${{ matrix.model }}
+          path: boot.img
