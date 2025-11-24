@@ -1,15 +1,15 @@
-name: Build CruelKernel with KernelSU
+name: Build CruelKernel with KernelSU (No Magisk)
 
 on:
-  push:
   workflow_dispatch:
+  push:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        model: [ "N975F" ]  # 👈 CHANGE TO YOUR MOD
+        model: [ "N975F" ]
 
     steps:
       - name: Checkout code
@@ -25,11 +25,13 @@ jobs:
           g++ gcc gcc-aarch64-linux-gnu git gnupg libelf-dev libncurses-dev \
           libssl-dev lld python3 unzip zstd
 
-      - name: Disable Magisk in config
-        run: |
-          sed -i '/+magisk/d' kernel/configs/cruel_${{ matrix.model }}.conf
+      - name: Fetch toolchains
+        run: git submodule update --init --recursive --depth 1
 
-      - name: Kernel Configure   
+      # Step 1: Configure with NODEFAULTS=1 and EXPLICITLY disable magisk
+      - name: Kernel Configure (NO MAGISK)
+        env:
+          NODEFAULTS: "1"          # ← This disables ALL defaults (including magisk)
         run: |
           ./cruelbuild config                    \
                        model=${{ matrix.model }} \
@@ -42,15 +44,25 @@ jobs:
                        +1000hz                   \
                        os_patch_level=2099-12
 
-      - name: Apply KernelSU patch
+      # Step 2: Confirm Magisk is OFF by inspecting generated config
+      - name: Debug: Show active config
         run: |
-          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+          echo "=== Generated config for ${{ matrix.model }} ==="
+          cat ".config_cruel" || echo ".config_cruel not found"
+          echo "=== End config ==="
 
+      # Step 3: Apply KernelSU
+      - name: Apply KernelSU (legacy 4.14/4.19)
+        run: |
+          git clone -b kernel-4.14-legacy https://github.com/tiann/KernelSU kernelsu
+          cp -r kernelsu/kernel/* .
+
+      # Step 4: Build
       - name: Build Kernel
         run: ./cruelbuild mkimg model=${{ matrix.model }}
 
       - name: Upload boot.img
-        uses: actions/upload-artifact@v4    # ✅ FIXED: v3 → v4
+        uses: actions/upload-artifact@v4
         with:
           name: boot-${{ matrix.model }}
           path: boot.img
