@@ -28,10 +28,12 @@ jobs:
       - name: Fetch toolchains
         run: git submodule update --init --recursive --depth 1
 
+      - name: Strip Magisk from build script
+        run: |
+          sed -i '/update_magisk(configs\["kernel"\]\["magisk"\]/d' ./cruelbuild
+
       # Step 1: Configure with NODEFAULTS=1 and EXPLICITLY disable magisk
       - name: Kernel Configure (NO MAGISK)
-        env:
-          NODEFAULTS: "1"          # ← This disables ALL defaults (including magisk)
         run: |
           ./cruelbuild config                    \
                        model=${{ matrix.model }} \
@@ -43,13 +45,6 @@ jobs:
                        +sdfat                    \
                        +1000hz                   \
                        os_patch_level=2099-12
-
-      # Step 2: Confirm Magisk is OFF by inspecting generated config
-      - name: Debug Show active config
-        run: |
-          echo "=== Generated config for ${{ matrix.model }} ==="
-          cat ".config_cruel" || echo ".config_cruel not found"
-          echo "=== End config ==="
 
       # Step 3: Apply KernelSU
       - name: Apply KernelSU
