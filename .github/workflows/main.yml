@@ -26,6 +26,8 @@ jobs:
           libssl-dev lld python3 unzip zstd
 
       - name: Kernel Configure
+        env:
+          NODEFAULTS: "1"        
         run: |
           ./cruelbuild config                    \
                        model=${{ matrix.model }} \
