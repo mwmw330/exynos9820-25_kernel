@@ -25,9 +25,11 @@ jobs:
           g++ gcc gcc-aarch64-linux-gnu git gnupg libelf-dev libncurses-dev \
           libssl-dev lld python3 unzip zstd
 
-      - name: Kernel Configure
-        env:
-          NODEFAULTS: "1"        
+      - name: Disable Magisk in config
+        run: |
+          sed -i '/+magisk/d' kernel/configs/cruel_${{ matrix.model }}.conf
+
+      - name: Kernel Configure   
         run: |
           ./cruelbuild config                    \
                        model=${{ matrix.model }} \
