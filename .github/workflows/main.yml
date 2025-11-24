@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        model: [ "N975F" ]  # 👈 CHANGE TO YOUR MODEL
+        model: [ "N975F" ]  # 👈 CHANGE TO YOUR MOD
 
     steps:
       - name: Checkout code
