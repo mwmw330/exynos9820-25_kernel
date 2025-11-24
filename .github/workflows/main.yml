@@ -30,6 +30,7 @@ jobs:
           ./cruelbuild config                    \
                        model=${{ matrix.model }} \
                        name="Cruel-KSU"          \
+                       -magisk                   \
                        +nohardening              \
                        +wireguard                \
                        +ttl                      \
